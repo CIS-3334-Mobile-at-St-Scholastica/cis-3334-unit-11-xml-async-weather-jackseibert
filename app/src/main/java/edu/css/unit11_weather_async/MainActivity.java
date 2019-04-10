@@ -20,6 +20,10 @@ public class MainActivity extends AppCompatActivity {
 
     AsyncDownloadXML AsyncWeatherDownloader = new AsyncDownloadXML();
 
+    /**
+     * On create method
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,24 +36,53 @@ public class MainActivity extends AppCompatActivity {
         etVis =  (EditText) findViewById(R.id.textVis);
     }
 
+    /**
+     * On create method
+     * @param v
+     * @throws XmlPullParserException
+     * @throws URISyntaxException
+     * @throws IOException
+     */
     public void btnClick (View v) throws XmlPullParserException, URISyntaxException, IOException {
         // Download the weather asynchronously
         AsyncWeatherDownloader.execute(this);
     }
 
+    /**
+     * Set temp field to String newTemp
+     * @param newTemp
+     */
     public void setTemp(String newTemp) {
         etTemp.setText(newTemp);
     }
 
+    /**
+     * Set wind field to String newWind
+     * @param newWind
+     */
     public void setWind(String newWind) {
         etWind.setText(newWind);
     }
 
+    /**
+     * Set visibility field to String newVis
+     * @param newVis
+     */
+    public void setVis(String newVis) {
+        etVis.setText(newVis);
+    }
+
+    /**
+     * Set location field
+     */
     public String getLocation() {
         return etLoc.getText().toString();
     }
 
-
+    /**
+     * setStatus toast method
+     * @param newStatus
+     */
     public void setStatus(String newStatus) {
         Toast toast=Toast.makeText(getApplicationContext(), newStatus,Toast.LENGTH_LONG );
         toast.show();

@@ -30,11 +30,17 @@ public class AsyncDownloadXML extends AsyncTask<MainActivity, String, String> {
             // Save a pointer to the main Weather Activity which is passed in as a parameter
             mainActivityLink = new_actWeather[0];
 
+            String zipcode = mainActivityLink.getLocation();
+            if(zipcode.isEmpty()){
+                return null;
+            }
+
             // create the XML Pull Parser
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser xpp = factory.newPullParser();
 
-            String  weatherStrURL =  "http://api.openweathermap.org/data/2.5/weather?zip=55811,us&appid=5aa6c40803fbb300fe98c6728bdafce7&mode=xml&units=imperial";
+            String  weatherStrURL =  "http://api.openweathermap.org/data/2.5/weather?zip=" +
+            zipcode + ",us&appid=5aa6c40803fbb300fe98c6728bdafce7&mode=xml&units=imperial";
             URL weatherURL =  new URL(weatherStrURL);
             InputStream stream = weatherURL.openStream();
             xpp.setInput(stream, null);
@@ -42,7 +48,8 @@ public class AsyncDownloadXML extends AsyncTask<MainActivity, String, String> {
 
             String tempStr = "Updating...";			// Temperature Update String
             String windStr = "Updating...";			// Wind Update String
-            publishProgress(tempStr,windStr);
+            String visibleStr = "Updating...";      // Visibility Update String
+            publishProgress(tempStr,windStr,visibleStr);
 
             Log.v("== CIS 3334 ==","AsyncDownloadXML repeat until end of document arrives");
             while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -55,15 +62,22 @@ public class AsyncDownloadXML extends AsyncTask<MainActivity, String, String> {
                     Log.v("== CIS 3334 ==","Start tag found with name = "+tag);
                     if (tag.equals("speed")){
                         // XML should look like: <speed value="11.41" name="Strong breeze"/>
-
+                        windStr = xpp.getAttributeValue(null, "value");
+                        Log.v("== CIS 3334 ==","Wind =" + windStr);
+                        publishProgress(tempStr,windStr,visibleStr);	// Update the display
                         // ======= CIS 3334 add code here to process wing speed =======
-
                     }
                     if (tag.equals("temperature")){
                         // XML should look like: <temperature value="37.47" min="33.8" max="41" unit="fahrenheit"/>
                         tempStr = xpp.getAttributeValue(null, "value");
                         Log.v("== CIS 3334 ==","Temp =" + tempStr);
-                        publishProgress(tempStr,windStr);	// Update the display
+                        publishProgress(tempStr,windStr,visibleStr);	// Update the display
+                    }
+                    if (tag.equals("visibility")){
+                        // XML should look like: <temperature value="37.47" min="33.8" max="41" unit="fahrenheit"/>
+                        visibleStr = xpp.getAttributeValue(null, "value");
+                        Log.v("== CIS 3334 ==","Visibility =" + visibleStr);
+                        publishProgress(tempStr,windStr,visibleStr);	// Update the display
                     }
                 }
                 eventType = xpp.next();
@@ -85,13 +99,22 @@ public class AsyncDownloadXML extends AsyncTask<MainActivity, String, String> {
         }
     }
 
+    /**
+     * Updates while in progress
+     * @param update
+     */
     @Override
     protected void onProgressUpdate(String... update) {
         Log.v("== CIS 3334 ==","in onProgressUpdate");
         mainActivityLink.setTemp(update[0]);
         mainActivityLink.setWind(update[1]);
+        mainActivityLink.setVis(update[2]);
     }
 
+    /**
+     * Set status on Main Activity
+     * @param result
+     */
     @Override
     protected void onPostExecute(String result) {
         Log.v("== CIS 3334 ==", "in onPostExecute");
